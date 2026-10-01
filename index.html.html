@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Glenfield Dairy Farm</title>
+<style>
+:root{--bg:#faf7ef;--card:#fff;--ink:#22301f;--muted:#5d6b58;--green:#3f6b3a;--cream:#f0e8d0;--line:#e2dcc6;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#171c15;--card:#212a1e;--ink:#eef0e6;--muted:#a7b39f;--green:#8fc27f;--cream:#2b3526;--line:#334030}}
+:root[data-theme="dark"]{--bg:#171c15;--card:#212a1e;--ink:#eef0e6;--muted:#a7b39f;--green:#8fc27f;--cream:#2b3526;--line:#334030}
+html{scroll-behavior:smooth;scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.6 Georgia,serif}
+nav{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;padding:14px 5vw;border-bottom:1px solid var(--line)}
+nav b{color:var(--green);font-size:1.2rem}
+nav a{color:var(--ink);text-decoration:none;margin-left:16px;font:.95rem system-ui,sans-serif}
+.hero{padding:11vh 5vw;text-align:center;background:var(--cream)}
+.hero h1{font-size:clamp(2rem,6vw,3.4rem);margin:0 0 10px}
+.hero p{max-width:540px;margin:0 auto 20px;color:var(--muted)}
+.btn{display:inline-block;background:var(--green);color:#fff;padding:11px 24px;border-radius:30px;border:0;text-decoration:none;font:1rem system-ui,sans-serif;cursor:pointer}
+section{padding:50px 5vw;max-width:980px;margin:auto}
+h2{color:var(--green);margin:0 0 16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+.card h3{margin:2px 0}
+.tag{font:.72rem system-ui,sans-serif;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.price{font:600 1.05rem system-ui,sans-serif;color:var(--green);margin-top:6px}
+.out{opacity:.5}
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;background:var(--card)}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);font:.92rem system-ui,sans-serif}
+.form{display:grid;gap:12px;max-width:440px;font-family:system-ui,sans-serif}
+.form label{display:grid;gap:4px;font-size:.88rem;color:var(--muted)}
+input,select{padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);font-size:1rem;width:100%}
+code,pre{font:.85rem ui-monospace,Menlo,monospace;background:var(--cream);border-radius:8px}
+pre{padding:12px;overflow-x:auto;margin:8px 0}
+.err{color:#c0392b}
+.mpesa{border:2px solid #4cae4f;border-radius:12px;padding:12px 14px;background:var(--card);font:.92rem/1.5 system-ui,sans-serif}
+.mpesa ol{margin:6px 0 0;padding-left:20px}
+#total{font:600 1.05rem system-ui,sans-serif;color:var(--green)}
+footer{background:var(--cream);text-align:center;padding:26px 5vw;color:var(--muted);font:.9rem system-ui,sans-serif}
+</style>
+</head>
+<body>
+<nav><b>🐄 Glenfield Dairy Farm</b><div><a href="#products">Products</a><a href="#herd">Herd</a><a href="#delivery">Delivery</a><a href="#order">Order</a><a href="#sql">SQL</a></div></nav>
+
+<header class="hero">
+  <h1>Fresh from the field, every morning</h1>
+  <p>Family-run dairy farming: milk, yoghurt, butter and cheese from grass-fed cows.</p>
+  <a class="btn" href="#order">Order now</a>
+</header>
+
+<section id="products"><h2>Our products</h2><div class="grid" id="productGrid"></div></section>
+
+<section id="herd"><h2>Meet the herd</h2><div class="tw"><div id="herdTable"></div></div></section>
+
+<section id="delivery">
+  <h2>Delivery areas</h2>
+  <p>Order before 10am for same-day delivery where available. Delivery fees are added to your total.</p>
+  <div class="tw" id="areaTable"></div>
+</section>
+
+<section id="order">
+  <h2>Place an order</h2>
+  <div class="form">
+    <label>Your name <input id="cust"></label>
+    <label>Phone <input id="phone" type="tel"></label>
+    <label>Product <select id="prod"></select></label>
+    <label>Quantity <input id="qty" type="number" min="1" max="100" value="1"></label>
+    <label>Delivery area <select id="area"></select></label>
+    <div id="total"></div>
+    <div class="mpesa">
+      <b>Pay with M-Pesa</b>
+      <ol>
+        <li>Open M-Pesa, then Lipa na M-Pesa, then Buy Goods and Services.</li>
+        <li>Till number: <b>0114008618</b> (Glenfield Dairy Farm)</li>
+        <li>Amount: <b id="payAmt">KES 0</b></li>
+        <li>Type the M-Pesa confirmation code from your SMS below.</li>
+      </ol>
+    </div>
+    <label>M-Pesa confirmation code <input id="mpesa" maxlength="10" placeholder="e.g. QGH7X2K9LP" autocapitalize="characters"></label>
+    <button class="btn" id="send" type="button">Confirm order</button>
+    <div id="msg" role="status"></div>
+    <pre id="lastSql" hidden></pre>
+  </div>
+  <h3>Orders so far (from the orders table)</h3>
+  <div class="tw" id="orderTable"></div>
+</section>
+
+<section id="sql">
+  <h2>SQL console</h2>
+  <p>This site's data lives in SQL tables: <code>products</code>, <code>cows</code>, <code>orders</code>. Try a query:</p>
+  <div class="form" style="max-width:100%">
+    <input id="q" value="SELECT name, price_kes FROM products WHERE category = 'Cheese' ORDER BY price_kes DESC">
+    <button class="btn" id="run" type="button" style="justify-self:start">Run query</button>
+  </div>
+  <div class="tw" id="qOut"></div>
+</section>
+
+<footer>© 2026 Glenfield Dairy Farm · HTML + CSS + JavaScript + SQL in one file</footer>
+
+<!-- SQL: the database definition, embedded right in the page -->
+<script type="text/sql" id="schema">
+CREATE TABLE products (id, name, category, unit, price_kes, in_stock);
+CREATE TABLE cows (id, name, breed, litres_per_day);
+CREATE TABLE orders (id, customer, phone, product_id, quantity, area, total_kes, mpesa_code, status, ordered_on);
+CREATE TABLE delivery_areas (id, area, fee_kes, days);
+INSERT INTO delivery_areas (id,area,fee_kes,days) VALUES (1,'Kiambu Town',150,'Daily');
+INSERT INTO delivery_areas (id,area,fee_kes,days) VALUES (2,'Ruiru',200,'Mon to Sat');
+INSERT INTO delivery_areas (id,area,fee_kes,days) VALUES (3,'Kasarani / Roysambu',250,'Mon, Wed, Fri, Sat');
+INSERT INTO delivery_areas (id,area,fee_kes,days) VALUES (4,'Nairobi CBD',250,'Mon to Sat');
+INSERT INTO delivery_areas (id,area,fee_kes,days) VALUES (5,'Westlands',300,'Tue, Thu, Sat');
+INSERT INTO delivery_areas (id,area,fee_kes,days) VALUES (6,'Karen / Langata',300,'Tue, Thu, Sat');
+INSERT INTO products (id,name,category,unit,price_kes,in_stock) VALUES (1,'Fresh Whole Milk','Milk','1 litre',70,1);
+INSERT INTO products (id,name,category,unit,price_kes,in_stock) VALUES (2,'Skimmed Milk','Milk','1 litre',75,1);
+INSERT INTO products (id,name,category,unit,price_kes,in_stock) VALUES (3,'Natural Yoghurt','Yoghurt','500 ml',120,1);
+INSERT INTO products (id,name,category,unit,price_kes,in_stock) VALUES (4,'Strawberry Yoghurt','Yoghurt','500 ml',140,1);
+INSERT INTO products (id,name,category,unit,price_kes,in_stock) VALUES (5,'Farmhouse Butter','Butter','250 g',350,1);
+INSERT INTO products (id,name,category,unit,price_kes,in_stock) VALUES (6,'Mature Cheddar','Cheese','250 g',600,1);
+INSERT INTO products (id,name,category,unit,price_kes,in_stock) VALUES (7,'Fresh Mozzarella','Cheese','200 g',450,0);
+INSERT INTO products (id,name,category,unit,price_kes,in_stock) VALUES (8,'Ghee','Butter','500 g',900,1);
+INSERT INTO cows (id,name,breed,litres_per_day) VALUES (1,'Daisy','Friesian',28.5);
+INSERT INTO cows (id,name,breed,litres_per_day) VALUES (2,'Bella','Ayrshire',22);
+INSERT INTO cows (id,name,breed,litres_per_day) VALUES (3,'Maggie','Jersey',18.5);
+INSERT INTO cows (id,name,breed,litres_per_day) VALUES (4,'Rosie','Friesian',30);
+</script>
+
+<script>
+/* ---- A tiny SQL engine: CREATE TABLE, INSERT, SELECT ... WHERE ... ORDER BY ---- */
+const DB = {};
+const val = s => { s = s.trim(); if (/^'.*'$/.test(s)) return s.slice(1, -1); return isNaN(s) || s === "" ? s : Number(s); };
+function sql(q) {
+  q = q.trim().replace(/;$/, "");
+  let m;
+  if ((m = q.match(/^create table (\w+)\s*\((.+)\)$/i))) {
+    DB[m[1].toLowerCase()] = { cols: m[2].split(",").map(c => c.trim()), rows: [] };
+    return { message: "Table created" };
+  }
+  if ((m = q.match(/^insert into (\w+)\s*\(([^)]+)\)\s*values\s*\((.+)\)$/i))) {
+    const t = DB[m[1].toLowerCase()]; if (!t) throw Error("No such table: " + m[1]);
+    const cols = m[2].split(",").map(c => c.trim()), vs = (m[3].match(/'[^']*'|[^,]+/g) || []).map(val);
+    const row = {}; t.cols.forEach(c => row[c] = null); cols.forEach((c, i) => { if (!(c in row)) throw Error("No such column: " + c); row[c] = vs[i]; });
+    t.rows.push(row); return { message: "1 row inserted" };
+  }
+  if ((m = q.match(/^select\s+(.+?)\s+from\s+(\w+)(?:\s+where\s+(\w+)\s*(>=|<=|!=|=|>|<)\s*('[^']*'|\S+))?(?:\s+order\s+by\s+(\w+)(?:\s+(asc|desc))?)?$/i))) {
+    const t = DB[m[2].toLowerCase()]; if (!t) throw Error("No such table: " + m[2]);
+    let rows = t.rows.slice();
+    if (m[3]) { const v = val(m[5]); rows = rows.filter(r => { const x = r[m[3]]; return { "=": x == v, "!=": x != v, ">": x > v, "<": x < v, ">=": x >= v, "<=": x <= v }[m[4]]; }); }
+    if (m[6]) { const d = /desc/i.test(m[7] || "") ? -1 : 1; rows.sort((a, b) => (a[m[6]] > b[m[6]] ? 1 : a[m[6]] < b[m[6]] ? -1 : 0) * d); }
+    const cols = m[1].trim() === "*" ? t.cols : m[1].split(",").map(c => c.trim());
+    cols.forEach(c => { if (!t.cols.includes(c)) throw Error("No such column: " + c); });
+    return { cols, rows };
+  }
+  throw Error("Supported: CREATE TABLE, INSERT INTO, SELECT ... FROM ... [WHERE] [ORDER BY]");
+}
+
+/* ---- Helpers ---- */
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const table = r => r.rows.length ? `<table><thead><tr>${r.cols.map(c => `<th>${esc(c)}</th>`).join("")}</tr></thead><tbody>${r.rows.map(x => `<tr>${r.cols.map(c => `<td>${esc(x[c])}</td>`).join("")}</tr>`).join("")}</tbody></table>` : "<p>No rows.</p>";
+
+/* ---- Boot: run the embedded SQL, restore saved orders ---- */
+$("schema").textContent.split(";").map(s => s.trim()).filter(Boolean).forEach(sql);
+try { (JSON.parse(localStorage.getItem("glenfield_orders")) || []).forEach(o => DB.orders.rows.push(o)); } catch (e) {}
+
+function render() {
+  const p = sql("SELECT * FROM products ORDER BY category");
+  $("productGrid").innerHTML = p.rows.map(r => `<div class="card ${r.in_stock ? "" : "out"}"><span class="tag">${esc(r.category)}</span><h3>${esc(r.name)}</h3><div>${esc(r.unit)}</div><div class="price">KES ${r.price_kes}${r.in_stock ? "" : " · sold out"}</div></div>`).join("");
+  $("prod").innerHTML = sql("SELECT * FROM products WHERE in_stock = 1").rows.map(r => `<option value="${r.id}">${esc(r.name)} (${esc(r.unit)}) KES ${r.price_kes}</option>`).join("");
+  $("herdTable").innerHTML = table(sql("SELECT name, breed, litres_per_day FROM cows ORDER BY litres_per_day DESC"));
+  $("areaTable").innerHTML = table(sql("SELECT area, fee_kes, days FROM delivery_areas ORDER BY fee_kes"));
+  $("area").innerHTML = sql("SELECT * FROM delivery_areas ORDER BY fee_kes").rows.map(r => `<option value="${r.id}">${esc(r.area)} (KES ${r.fee_kes})</option>`).join("");
+  $("orderTable").innerHTML = table(sql("SELECT id, customer, quantity, area, total_kes, mpesa_code, status FROM orders"));
+  updateTotal();
+}
+function calc() {
+  const p = sql("SELECT * FROM products WHERE id = " + (parseInt($("prod").value, 10) || 0)).rows[0];
+  const a = sql("SELECT * FROM delivery_areas WHERE id = " + (parseInt($("area").value, 10) || 0)).rows[0];
+  const q = parseInt($("qty").value, 10) || 0;
+  if (!p || !a) return null;
+  return { p, a, q, items: p.price_kes * q, fee: a.fee_kes, total: p.price_kes * q + a.fee_kes };
+}
+function updateTotal() {
+  const c = calc(); if (!c) return;
+  $("total").textContent = `Items KES ${c.items} + delivery KES ${c.fee} = KES ${c.total}`;
+  $("payAmt").textContent = `KES ${c.total}`;
+}
+["prod", "area", "qty"].forEach(id => $(id).addEventListener("input", updateTotal));
+
+$("send").onclick = () => {
+  const name = $("cust").value.replace(/['",;()]/g, "").trim(), phone = $("phone").value.replace(/[^0-9+ ]/g, "").trim();
+  const code = $("mpesa").value.trim().toUpperCase(), c = calc(), msg = $("msg");
+  if (!c || !name || !phone || !(c.q >= 1 && c.q <= 100)) { msg.className = "err"; msg.textContent = "Please fill in every field (quantity 1 to 100)."; return; }
+  if (!/^[A-Z0-9]{10}$/.test(code)) { msg.className = "err"; msg.textContent = "Enter the 10-character M-Pesa code from your payment SMS."; return; }
+  if (DB.orders.rows.some(o => o.mpesa_code === code)) { msg.className = "err"; msg.textContent = "That M-Pesa code has already been used."; return; }
+  const id = DB.orders.rows.length + 1, today = new Date().toISOString().slice(0, 10);
+  const stmt = `INSERT INTO orders (id,customer,phone,product_id,quantity,area,total_kes,mpesa_code,status,ordered_on) VALUES (${id},'${name}','${phone}',${c.p.id},${c.q},'${c.a.area}',${c.total},'${code}','Awaiting verification','${today}')`;
+  sql(stmt);
+  try { localStorage.setItem("glenfield_orders", JSON.stringify(DB.orders.rows)); } catch (e) {}
+  msg.className = ""; msg.textContent = `Thanks ${name}! Order #${id} received. We'll confirm your payment of KES ${c.total} and deliver to ${c.a.area}.`;
+  $("lastSql").hidden = false; $("lastSql").textContent = stmt;
+  $("mpesa").value = "";
+  render();
+};
+
+$("run").onclick = () => {
+  try { const r = sql($("q").value); $("qOut").innerHTML = r.message ? `<p>${esc(r.message)}</p>` : table(r); }
+  catch (e) { $("qOut").innerHTML = `<p class="err">${esc(e.message)}</p>`; }
+  render();
+};
+render(); $("run").click();
+</script>
+</body>
+</html>
